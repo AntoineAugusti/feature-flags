@@ -45,5 +45,12 @@ func getRoutes(api *APIHandler) Routes {
 			"/features/{featureKey}",
 			api.FeatureShow,
 		},
+		// curl -H "Content-Type: application/json" -d '{"groups":"foo"}' -X GET http://localhost:8080/features/feature_test/access
+		Route{
+			"FeatureAccess",
+			"GET",
+			"/features/{featureKey}/access",
+			api.FeatureAccess,
+		},
 	}
 }
