@@ -63,7 +63,6 @@ func (handler *APIHandler) FeatureShow(w http.ResponseWriter, r *http.Request) {
 }
 
 func (handler *APIHandler) FeatureAccess(w http.ResponseWriter, r *http.Request) {
-	var hasAccess bool
 	var ar AccessRequest
 	vars := mux.Vars(r)
 
@@ -78,6 +77,8 @@ func (handler *APIHandler) FeatureAccess(w http.ResponseWriter, r *http.Request)
 	if err != nil {
 		panic(err)
 	}
+
+	hasAccess := feature.isEnabled()
 
 	// Decode the access request
 	err = json.NewDecoder(r.Body).Decode(&ar)
