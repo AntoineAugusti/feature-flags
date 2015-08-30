@@ -12,6 +12,8 @@ type FeatureFlag struct {
 	Percentage uint32   `json:"percentage"`
 }
 
+type FeatureFlags []FeatureFlag
+
 func (f *FeatureFlag) isEnabled() bool {
 	return f.Enabled
 }

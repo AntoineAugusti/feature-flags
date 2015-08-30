@@ -31,7 +31,7 @@ func (interactor *FeatureService) AddFeature(newFeature FeatureFlag) error {
 	})
 }
 
-func (interactor *FeatureService) GetFeatures() (features []FeatureFlag, err error) {
+func (interactor *FeatureService) GetFeatures() (features FeatureFlags, err error) {
 	_ = interactor.DB.View(func(tx *bolt.Tx) error {
 
 		features, err = getFeatures(tx)

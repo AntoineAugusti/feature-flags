@@ -23,11 +23,11 @@ func putFeature(tx *bolt.Tx, feature FeatureFlag) error {
 	return nil
 }
 
-func getFeatures(tx *bolt.Tx) ([]FeatureFlag, error) {
+func getFeatures(tx *bolt.Tx) (FeatureFlags, error) {
 	featuresBucket := tx.Bucket([]byte(getBucketName()))
 	cursor := featuresBucket.Cursor()
 
-	features := make([]FeatureFlag, 0)
+	features := make(FeatureFlags, 0)
 
 	for key, value := cursor.First(); key != nil; key, value = cursor.Next() {
 		feature := FeatureFlag{}
