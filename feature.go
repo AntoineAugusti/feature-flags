@@ -16,7 +16,7 @@ type FeatureFlag struct {
 
 type FeatureFlags []FeatureFlag
 
-func (f *FeatureFlag) validate() error {
+func (f *FeatureFlag) Validate() error {
 	// Validate percentage
 	if f.Percentage < 0 || f.Percentage > 100 {
 		return fmt.Errorf("Percentage must be between 0 and 100")
@@ -33,16 +33,16 @@ func (f *FeatureFlag) validate() error {
 	return nil
 }
 
-func (f *FeatureFlag) isEnabled() bool {
+func (f *FeatureFlag) IsEnabled() bool {
 	return f.Enabled
 }
 
-func (f *FeatureFlag) isPartiallyEnabled() bool {
-	return !f.Enabled && (f.hasUsers() || f.hasGroups() || f.hasPercentage())
+func (f *FeatureFlag) IsPartiallyEnabled() bool {
+	return !f.IsEnabled() && (f.hasUsers() || f.hasGroups() || f.hasPercentage())
 }
 
-func (f *FeatureFlag) groupHasAccess(group string) bool {
-	return f.isEnabled() || (f.isPartiallyEnabled() && f.groupInGroups(group))
+func (f *FeatureFlag) GroupHasAccess(group string) bool {
+	return f.IsEnabled() || f.Percentage == 100 || (f.IsPartiallyEnabled() && f.groupInGroups(group))
 }
 
 func (f *FeatureFlag) UserHasAccess(user uint32) bool {
@@ -50,7 +50,7 @@ func (f *FeatureFlag) UserHasAccess(user uint32) bool {
 	// - if the feature is enabled
 	// - if the feature is partially enabled and he has been given access explicity
 	// - if the feature is partially enabled and he is in the allowed percentage
-	return f.isEnabled() || (f.isPartiallyEnabled() && (f.userInUsers(user) || f.userIsAllowedByPercentage(user)))
+	return f.IsEnabled() || (f.IsPartiallyEnabled() && (f.userInUsers(user) || f.userIsAllowedByPercentage(user)))
 }
 
 func (f *FeatureFlag) hasUsers() bool {

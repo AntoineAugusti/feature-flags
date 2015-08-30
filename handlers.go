@@ -78,7 +78,7 @@ func (handler *APIHandler) FeatureAccess(w http.ResponseWriter, r *http.Request)
 		panic(err)
 	}
 
-	hasAccess := feature.isEnabled()
+	hasAccess := feature.IsEnabled()
 
 	// Decode the access request
 	err = json.NewDecoder(r.Body).Decode(&ar)
@@ -89,7 +89,7 @@ func (handler *APIHandler) FeatureAccess(w http.ResponseWriter, r *http.Request)
 
 	if len(ar.Groups) > 0 {
 		for _, group := range ar.Groups {
-			if feature.groupHasAccess(group) {
+			if feature.GroupHasAccess(group) {
 				hasAccess = true
 				break
 			}
@@ -133,7 +133,7 @@ func (handler *APIHandler) FeatureCreate(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	if err := feature.validate(); err != nil {
+	if err := feature.Validate(); err != nil {
 		writeMessage(400, "invalid_feature", err.Error(), w)
 		return
 	}
@@ -173,7 +173,7 @@ func (handler *APIHandler) FeatureEdit(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Validate given values
-	if err := newFeature.validate(); err != nil {
+	if err := newFeature.Validate(); err != nil {
 		writeMessage(400, "invalid_feature", err.Error(), w)
 		return
 	}
