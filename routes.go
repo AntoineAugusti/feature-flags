@@ -52,5 +52,12 @@ func getRoutes(api *APIHandler) Routes {
 			"/features/{featureKey}/access",
 			api.FeatureAccess,
 		},
+		// curl -H "Content-Type: application/json" -X PATCH -d '{"percentage": 42}' http://localhost:8080/features/blah
+		Route{
+			"FeatureEdit",
+			"PATCH",
+			"/features/{featureKey}",
+			api.FeatureEdit,
+		},
 	}
 }

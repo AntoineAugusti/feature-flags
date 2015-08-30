@@ -59,35 +59,35 @@ func (interactor *FeatureService) GetFeature(featureKey string) (feature Feature
 	return
 }
 
-func (interactor *FeatureService) UpdateFeature(key string, enabled bool, users []uint32, groups []string, percentage uint32) error {
-	return interactor.DB.Update(func(tx *bolt.Tx) error {
+func (interactor *FeatureService) UpdateFeature(featureKey string, newFeature FeatureFlag) (feature FeatureFlag, err error) {
+	_ = interactor.DB.Update(func(tx *bolt.Tx) error {
 
-		feature, err := getFeature(tx, key)
-		if err != nil {
+		if feature, err = getFeature(tx, featureKey); err != nil {
 			return err
 		}
 
-		feature.Enabled = enabled
+		feature.Enabled = newFeature.Enabled
 
-		if len(users) > 0 {
-			feature.Users = users
+		if len(newFeature.Users) > 0 {
+			feature.Users = newFeature.Users
 		}
 
-		if len(groups) > 0 {
-			feature.Groups = groups
+		if len(newFeature.Groups) > 0 {
+			feature.Groups = newFeature.Groups
 		}
 
-		if percentage > 0 {
-			feature.Percentage = percentage
+		if newFeature.Percentage > 0 {
+			feature.Percentage = newFeature.Percentage
 		}
 
-		err = putFeature(tx, feature)
-		if err != nil {
+		if err = putFeature(tx, feature); err != nil {
 			return err
 		}
 
 		return nil
 	})
+
+	return
 }
 
 func (interactor *FeatureService) RemoveFeature(featureKey string) error {

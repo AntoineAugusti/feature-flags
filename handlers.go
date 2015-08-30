@@ -127,8 +127,8 @@ func (handler *APIHandler) FeatureRemove(w http.ResponseWriter, r *http.Request)
 
 func (handler *APIHandler) FeatureCreate(w http.ResponseWriter, r *http.Request) {
 	var feature FeatureFlag
-	err := json.NewDecoder(r.Body).Decode(&feature)
-	if err != nil {
+
+	if err := json.NewDecoder(r.Body).Decode(&feature); err != nil {
 		writeUnprocessableEntity(err, w)
 		return
 	}
@@ -142,6 +142,39 @@ func (handler *APIHandler) FeatureCreate(w http.ResponseWriter, r *http.Request)
 	w.Header().Set("Content-Type", getJsonHeader())
 	w.WriteHeader(http.StatusCreated)
 	if err := json.NewEncoder(w).Encode(feature); err != nil {
+		panic(err)
+	}
+}
+
+func (handler *APIHandler) FeatureEdit(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+
+	// Check if the feature exists
+	if !handler.FeatureExists(vars["featureKey"]) {
+		writeNotFound(w)
+		return
+	}
+
+	// Fetch the feature
+	newFeature, err := handler.FeatureService.GetFeature(vars["featureKey"])
+	if err != nil {
+		panic(err)
+	}
+
+	// Update the overwritten fields of the feature
+	if err = json.NewDecoder(r.Body).Decode(&newFeature); err != nil {
+		writeUnprocessableEntity(err, w)
+		return
+	}
+
+	newFeature, err = handler.FeatureService.UpdateFeature(vars["featureKey"], newFeature)
+	if err != nil {
+		panic(err)
+	}
+
+	w.Header().Set("Content-Type", getJsonHeader())
+	w.WriteHeader(http.StatusOK)
+	if err := json.NewEncoder(w).Encode(newFeature); err != nil {
 		panic(err)
 	}
 }
