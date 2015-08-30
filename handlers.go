@@ -133,7 +133,7 @@ func (handler *APIHandler) FeatureCreate(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	err = handler.FeatureService.AddFeature(feature)
+	err := handler.FeatureService.AddFeature(feature)
 	if err != nil && err.Error() == "Feature already exists" {
 		writeMessage(400, "invalid_feature", err.Error(), w)
 		return
