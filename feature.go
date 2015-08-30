@@ -1,7 +1,9 @@
 package main
 
 import (
+	"fmt"
 	"hash/crc32"
+	"regexp"
 )
 
 type FeatureFlag struct {
@@ -13,6 +15,23 @@ type FeatureFlag struct {
 }
 
 type FeatureFlags []FeatureFlag
+
+func (f *FeatureFlag) validate() error {
+	// Validate percentage
+	if f.Percentage < 0 || f.Percentage > 100 {
+		return fmt.Errorf("Percentage must be between 0 and 100")
+	}
+
+	// Validate key
+	if len(f.Key) < 3 || len(f.Key) > 50 {
+		return fmt.Errorf("Feature key must be between 3 and 50 characters")
+	}
+
+	if !regexp.MustCompile(`^[a-z0-9_]*$`).MatchString(f.Key) {
+		return fmt.Errorf("Feature key must only contain digits, lowercase letters and underscores")
+	}
+	return nil
+}
 
 func (f *FeatureFlag) isEnabled() bool {
 	return f.Enabled

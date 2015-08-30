@@ -133,6 +133,11 @@ func (handler *APIHandler) FeatureCreate(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
+	if err := feature.validate(); err != nil {
+		writeMessage(400, "invalid_feature", err.Error(), w)
+		return
+	}
+
 	err := handler.FeatureService.AddFeature(feature)
 	if err != nil && err.Error() == "Feature already exists" {
 		writeMessage(400, "invalid_feature", err.Error(), w)
@@ -167,6 +172,12 @@ func (handler *APIHandler) FeatureEdit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Validate given values
+	if err := newFeature.validate(); err != nil {
+		writeMessage(400, "invalid_feature", err.Error(), w)
+		return
+	}
+
 	newFeature, err = handler.FeatureService.UpdateFeature(vars["featureKey"], newFeature)
 	if err != nil {
 		panic(err)
@@ -192,11 +203,7 @@ func writeNotFound(w http.ResponseWriter) {
 }
 
 func writeUnprocessableEntity(err error, w http.ResponseWriter) {
-	w.Header().Set("Content-Type", getJsonHeader())
-	w.WriteHeader(422) // Unprocessable entity
-	if err := json.NewEncoder(w).Encode(err); err != nil {
-		panic(err)
-	}
+	writeMessage(422, "invalid_json", "Cannot decode the given JSON payload", w)
 }
 
 func writeMessage(code int, status string, message string, w http.ResponseWriter) {
