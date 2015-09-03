@@ -9,14 +9,6 @@ import (
 	"github.com/boltdb/bolt"
 )
 
-func Map(vs []string, f func(string) string) []string {
-	vsm := make([]string, len(vs))
-	for i, v := range vs {
-		vsm[i] = f(v)
-	}
-	return vsm
-}
-
 func main() {
 	address := flag.String("a", ":8080", "address to listen")
 	boltLocation := flag.String("d", "bolt.db", "location of the database file")
