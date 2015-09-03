@@ -1,5 +1,6 @@
 [![Travis CI](http://img.shields.io/travis/AntoineAugusti/golang-feature-flags/master.svg?style=flat)](https://travis-ci.org/AntoineAugusti/golang-feature-flags)
 # Feature flags API in Go
+This package uses [boltdb/bolt](https://github.com/boltdb/bolt), a key-value store for storage. You do not need to connect another database! The HTTP routing is done by [gorilla/mux](http://www.gorillatoolkit.org/pkg/mux).
 
 ## Getting started
 You can grab this package with the following command:
