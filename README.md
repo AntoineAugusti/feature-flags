@@ -1,3 +1,4 @@
+[![Travis CI](http://img.shields.io/travis/AntoineAugusti/golang-feature-flags/master.svg?style=flat)](https://travis-ci.org/AntoineAugusti/golang-feature-flags)
 # Feature flags API in Go
 
 ## Getting started
