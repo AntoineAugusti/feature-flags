@@ -1,13 +1,37 @@
 # Feature flags API in Go
-Documentation on its way.
+
+## Getting started
+You can grab this package with the following command:
+```
+go get github.com/antoineaugusti/golang-feature-flags
+```
+
+And then build it:
+```
+cd $GOPATHsrc/github.com/antoineaugusti/golang-feature-flags
+go build
+```
+
+## Usage
+From the `-h` flag
+```
+Usage of ./golang-feature-flags:
+  -a string
+        address to listen (default ":8080")
+  -d string
+        location of the database file (default "bolt.db")
+```
+
+## Authentication
+This API does not ship with an authentication layer. You **should not** expose the API to the Internet. This API should be deployed behind a firewall, only your application servers should be allowed to send requests to the API.
 
 ## API Endpoints
-- [`GET` /features](#get-features)
-- [`POST` /features](#post-features)
-- [`GET` /features/:featureKey](#get-featuresfeaturekey)
-- [`DELETE` /features/:featureKey](#delete-featuresfeaturekey)
-- [`PATCH` /features/:featureKey](#patch-featuresfeaturekey)
-- [`GET` /features/:featureKey/access](#get-featuresfeaturekeyaccess)
+- [`GET` /features](#get-features) - Get a list of feature flags
+- [`POST` /features](#post-features) - Create a feature flag
+- [`GET` /features/:featureKey](#get-featuresfeaturekey) - Get a single feature flag
+- [`DELETE` /features/:featureKey](#delete-featuresfeaturekey) - Delete a feature flag
+- [`PATCH` /features/:featureKey](#patch-featuresfeaturekey) - Update a feature flag
+- [`GET` /features/:featureKey/access](#get-featuresfeaturekeyaccess) - Check if someone has access to a feature
 
 ### API Documentation
 #### `GET` `/features`
@@ -55,6 +79,7 @@ Create a new feature flag.
 - Endpoint: `/features`
 - Input:
     The `Content-Type` HTTP header should be set to `application/json`
+
     ```json
    {
       "key":"homepage_v2",
@@ -127,7 +152,7 @@ Get a specific feature flag.
     }
     ```
 
-#### `DELETE` `/features`
+#### `DELETE` `/features/:featureKey`
 Remove a feature flag.
 - Method: `DELETE`
 - Endpoint: `/features/:featureKey`
@@ -153,6 +178,7 @@ Update a feature flag.
 - Endpoint: `/features/:featureKey`
 - Input:
     The `Content-Type` HTTP header should be set to `application/json`
+
     ```json
    {
       "enabled":true,
