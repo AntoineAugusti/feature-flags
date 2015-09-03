@@ -2,6 +2,18 @@
 # Feature flags API in Go
 This package uses [boltdb/bolt](https://github.com/boltdb/bolt), a key-value store for storage. You do not need to connect another database! The HTTP routing is done by [gorilla/mux](http://www.gorillatoolkit.org/pkg/mux).
 
+## What are feature flags?
+Feature flags let you enable or disable some features of your application, for example when you're under unexpected traffic or when you want to let some users try a new feature you've been working on. They decouple feature release and code deployment, so that you can release features whenever you want, instead of whenever the code happens to ship.
+
+With this package, you can enable the access of a feature for:
+- specific user IDs
+- specific groups
+- a percentage of your user base
+- everyone
+- no one
+
+And you can combine things! You can give access to a feature for users in the group `dev` or `admin` and for users `1337` and `42` if you want to.
+
 ## Getting started
 You can grab this package with the following command:
 ```
