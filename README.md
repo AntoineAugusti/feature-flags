@@ -8,12 +8,12 @@ go get github.com/antoineaugusti/golang-feature-flags
 
 And then build it:
 ```
-cd $GOPATHsrc/github.com/antoineaugusti/golang-feature-flags
+cd ${GOPATH%/}/src/github.com/antoineaugusti/golang-feature-flags
 go build
 ```
 
 ## Usage
-From the `-h` flag
+From the `-h` flag:
 ```
 Usage of ./golang-feature-flags:
   -a string
