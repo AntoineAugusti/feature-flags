@@ -107,7 +107,7 @@ Create a new feature flag.
    }
     ```
 - Responses:
-    * 200 OK
+    * 201 Created
     ```json
    {
       "key":"homepage_v2",
