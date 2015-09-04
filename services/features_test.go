@@ -78,7 +78,7 @@ func TestUpdateFeature(t *testing.T) {
 	// Update the feature
 	f, err := getService(db).UpdateFeature(newFeature.Key, newFeature)
 	assert.Nil(t, err)
-	assert.Equal(t, f.Enabled, true)
+	assert.True(t, f.Enabled)
 	assert.Equal(t, f.Users, []uint32{1, 2})
 	assert.Equal(t, f.Groups, []string{"c", "d"})
 	assert.Equal(t, f.Percentage, uint32(22))
@@ -110,11 +110,11 @@ func TestFeatureExists(t *testing.T) {
 
 	// Create a new feature
 	_ = getService(db).AddFeature(getDummyFeature())
-	assert.Equal(t, getService(db).FeatureExists("foo"), true)
+	assert.True(t, getService(db).FeatureExists("foo"))
 
 	// Delete the feature
 	_ = getService(db).RemoveFeature("foo")
-	assert.Equal(t, getService(db).FeatureExists("foo"), false)
+	assert.False(t, getService(db).FeatureExists("foo"))
 }
 
 func getService(db *bolt.DB) *FeatureService {
