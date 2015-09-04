@@ -1,15 +1,17 @@
-package main
+package http
 
 import (
 	"encoding/json"
 	"fmt"
 	"net/http"
 
+	m "github.com/antoineaugusti/golang-feature-flags/models"
+	services "github.com/antoineaugusti/golang-feature-flags/services"
 	"github.com/gorilla/mux"
 )
 
 type APIHandler struct {
-	FeatureService FeatureService
+	FeatureService services.FeatureService
 }
 
 type APIMessage struct {
@@ -126,7 +128,7 @@ func (handler *APIHandler) FeatureRemove(w http.ResponseWriter, r *http.Request)
 }
 
 func (handler *APIHandler) FeatureCreate(w http.ResponseWriter, r *http.Request) {
-	var feature FeatureFlag
+	var feature m.FeatureFlag
 
 	if err := json.NewDecoder(r.Body).Decode(&feature); err != nil {
 		writeUnprocessableEntity(err, w)

@@ -1,9 +1,11 @@
-package main
+package models
 
 import (
 	"fmt"
 	"hash/crc32"
 	"regexp"
+
+	helpers "github.com/antoineaugusti/golang-feature-flags/helpers"
 )
 
 type FeatureFlag struct {
@@ -66,13 +68,13 @@ func (f *FeatureFlag) hasPercentage() bool {
 }
 
 func (f *FeatureFlag) userIsAllowedByPercentage(user uint32) bool {
-	return crc32.ChecksumIEEE(uint32ToBytes(user))%100 < f.Percentage
+	return crc32.ChecksumIEEE(helpers.Uint32ToBytes(user))%100 < f.Percentage
 }
 
 func (f *FeatureFlag) userInUsers(user uint32) bool {
-	return intInSlice(user, f.Users)
+	return helpers.IntInSlice(user, f.Users)
 }
 
 func (f *FeatureFlag) groupInGroups(group string) bool {
-	return stringInSlice(group, f.Groups)
+	return helpers.StringInSlice(group, f.Groups)
 }

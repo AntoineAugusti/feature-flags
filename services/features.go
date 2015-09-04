@@ -1,8 +1,10 @@
-package main
+package services
 
 import (
 	"fmt"
 
+	m "github.com/antoineaugusti/golang-feature-flags/models"
+	repos "github.com/antoineaugusti/golang-feature-flags/repos"
 	"github.com/boltdb/bolt"
 )
 
@@ -10,10 +12,10 @@ type FeatureService struct {
 	DB *bolt.DB
 }
 
-func (interactor *FeatureService) AddFeature(newFeature FeatureFlag) error {
+func (interactor *FeatureService) AddFeature(newFeature m.FeatureFlag) error {
 	return interactor.DB.Update(func(tx *bolt.Tx) error {
 
-		feature, err := getFeature(tx, newFeature.Key)
+		feature, err := repos.GetFeature(tx, newFeature.Key)
 		if err != nil && err.Error() != "Unable to find feature" {
 			return err
 		}
@@ -22,7 +24,7 @@ func (interactor *FeatureService) AddFeature(newFeature FeatureFlag) error {
 			return fmt.Errorf("Feature already exists")
 		}
 
-		err = putFeature(tx, newFeature)
+		err = repos.PutFeature(tx, newFeature)
 		if err != nil {
 			return err
 		}
@@ -31,10 +33,10 @@ func (interactor *FeatureService) AddFeature(newFeature FeatureFlag) error {
 	})
 }
 
-func (interactor *FeatureService) GetFeatures() (features FeatureFlags, err error) {
+func (interactor *FeatureService) GetFeatures() (features m.FeatureFlags, err error) {
 	_ = interactor.DB.View(func(tx *bolt.Tx) error {
 
-		features, err = getFeatures(tx)
+		features, err = repos.GetFeatures(tx)
 		if err != nil {
 			return err
 		}
@@ -45,10 +47,10 @@ func (interactor *FeatureService) GetFeatures() (features FeatureFlags, err erro
 	return
 }
 
-func (interactor *FeatureService) GetFeature(featureKey string) (feature FeatureFlag, err error) {
+func (interactor *FeatureService) GetFeature(featureKey string) (feature m.FeatureFlag, err error) {
 	_ = interactor.DB.View(func(tx *bolt.Tx) error {
 
-		feature, err = getFeature(tx, featureKey)
+		feature, err = repos.GetFeature(tx, featureKey)
 		if err != nil {
 			return err
 		}
@@ -59,10 +61,10 @@ func (interactor *FeatureService) GetFeature(featureKey string) (feature Feature
 	return
 }
 
-func (interactor *FeatureService) UpdateFeature(featureKey string, newFeature FeatureFlag) (feature FeatureFlag, err error) {
+func (interactor *FeatureService) UpdateFeature(featureKey string, newFeature m.FeatureFlag) (feature m.FeatureFlag, err error) {
 	_ = interactor.DB.Update(func(tx *bolt.Tx) error {
 
-		if feature, err = getFeature(tx, featureKey); err != nil {
+		if feature, err = repos.GetFeature(tx, featureKey); err != nil {
 			return err
 		}
 
@@ -80,7 +82,7 @@ func (interactor *FeatureService) UpdateFeature(featureKey string, newFeature Fe
 			feature.Percentage = newFeature.Percentage
 		}
 
-		if err = putFeature(tx, feature); err != nil {
+		if err = repos.PutFeature(tx, feature); err != nil {
 			return err
 		}
 
@@ -92,13 +94,13 @@ func (interactor *FeatureService) UpdateFeature(featureKey string, newFeature Fe
 
 func (interactor *FeatureService) RemoveFeature(featureKey string) error {
 	return interactor.DB.Update(func(tx *bolt.Tx) error {
-		return removeFeature(tx, featureKey)
+		return repos.RemoveFeature(tx, featureKey)
 	})
 }
 
 func (interactor *FeatureService) FeatureExists(featureKey string) (exists bool) {
 	_ = interactor.DB.View(func(tx *bolt.Tx) error {
-		exists = featureExists(tx, featureKey)
+		exists = repos.FeatureExists(tx, featureKey)
 		return nil
 	})
 

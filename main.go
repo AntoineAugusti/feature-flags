@@ -6,6 +6,9 @@ import (
 	"net/http"
 	"time"
 
+	db "github.com/antoineaugusti/golang-feature-flags/db"
+	h "github.com/antoineaugusti/golang-feature-flags/http"
+	s "github.com/antoineaugusti/golang-feature-flags/services"
 	"github.com/boltdb/bolt"
 )
 
@@ -15,35 +18,20 @@ func main() {
 	flag.Parse()
 
 	// Open the DB connection
-	db, err := bolt.Open(*boltLocation, 0600, &bolt.Options{Timeout: 1 * time.Second})
+	database, err := bolt.Open(*boltLocation, 0600, &bolt.Options{Timeout: 1 * time.Second})
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	// Close the DB connection on exit
-	defer db.Close()
+	defer database.Close()
 
 	// Generate the default bucket
-	generateDefaultBucket(getBucketName(), db)
+	db.GenerateDefaultBucket(db.GetBucketName(), database)
 
-	api := APIHandler{FeatureService{db}}
+	api := h.APIHandler{s.FeatureService{database}}
 
 	// Create and listen for the HTTP server
-	router := NewRouter(&api)
+	router := h.NewRouter(&api)
 	log.Fatal(http.ListenAndServe(*address, router))
-}
-
-func getBucketName() string {
-	return "features"
-}
-
-func generateDefaultBucket(name string, db *bolt.DB) {
-	_ = db.Update(func(tx *bolt.Tx) error {
-		_, err := tx.CreateBucketIfNotExists([]byte(name))
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		return nil
-	})
 }

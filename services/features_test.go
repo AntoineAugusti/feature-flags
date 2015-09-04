@@ -1,4 +1,4 @@
-package main
+package services
 
 import (
 	"log"
@@ -6,6 +6,8 @@ import (
 	"testing"
 	"time"
 
+	db "github.com/antoineaugusti/golang-feature-flags/db"
+	m "github.com/antoineaugusti/golang-feature-flags/models"
 	"github.com/boltdb/bolt"
 	"github.com/stretchr/testify/assert"
 )
@@ -120,22 +122,22 @@ func getService(db *bolt.DB) *FeatureService {
 }
 
 func getTestDB() *bolt.DB {
-	db, err := bolt.Open(getDBPath(), 0600, &bolt.Options{Timeout: 1 * time.Second})
+	database, err := bolt.Open(getDBPath(), 0600, &bolt.Options{Timeout: 1 * time.Second})
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	generateDefaultBucket(getBucketName(), db)
+	db.GenerateDefaultBucket(db.GetBucketName(), database)
 
-	return db
+	return database
 }
 
 func getDBPath() string {
 	return "/tmp/test.db"
 }
 
-func getDummyFeature() FeatureFlag {
-	return FeatureFlag{
+func getDummyFeature() m.FeatureFlag {
+	return m.FeatureFlag{
 		Key:        "foo",
 		Enabled:    false,
 		Users:      []uint32{22},
