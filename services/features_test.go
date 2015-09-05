@@ -147,8 +147,8 @@ func getDummyFeature() m.FeatureFlag {
 }
 
 func closeDB(db *bolt.DB) {
+	db.Close()
 	if err := os.Remove(getDBPath()); err != nil {
 		panic(err)
 	}
-	db.Close()
 }
