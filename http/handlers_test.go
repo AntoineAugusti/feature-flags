@@ -145,6 +145,64 @@ func TestDeleteFeatureFlag(t *testing.T) {
 	assert404Response(t, res)
 }
 
+func TestEditFeatureFlag(t *testing.T) {
+	onStart()
+	defer onFinish()
+
+	// Add the default dummy feature
+	reader = strings.NewReader(getDummyFeaturePayload())
+	postRequest, _ := http.NewRequest("POST", base, reader)
+	http.DefaultClient.Do(postRequest)
+
+	// Edit the default dummy feature
+	payload := `{
+      "enabled":true,
+      "users":[1,2],
+      "groups":[
+         "a",
+         "b"
+      ],
+      "percentage":42
+    }`
+
+	reader = strings.NewReader(payload)
+	request, _ := http.NewRequest("PATCH", fmt.Sprintf("%s/%s", base, "homepage_v2"), reader)
+	res, _ := http.DefaultClient.Do(request)
+
+	assertJSONMatchesStructure(
+		t, res,
+		"homepage_v2",
+		true,
+		[]int{1, 2},
+		[]string{"a", "b"},
+		42,
+	)
+
+	// Edit an unexisting feature
+	request, _ = http.NewRequest("PATCH", fmt.Sprintf("%s/%s", base, "notfound"), reader)
+	res, _ = http.DefaultClient.Do(request)
+
+	assert404Response(t, res)
+
+	// Edit with an invalid JSON payload
+	reader = strings.NewReader("{foo:bar}")
+	request, _ = http.NewRequest("PATCH", fmt.Sprintf("%s/%s", base, "homepage_v2"), reader)
+	res, _ = http.DefaultClient.Do(request)
+
+	assert422Response(t, res)
+
+	// Edit with an invalid percentage
+	reader = strings.NewReader(`{"percentage":101}`)
+	request, _ = http.NewRequest("PATCH", fmt.Sprintf("%s/%s", base, "homepage_v2"), reader)
+	res, _ = http.DefaultClient.Do(request)
+
+	assertResponseWithStatusAndMessage(t, res, http.StatusBadRequest, "invalid_feature", "Percentage must be between 0 and 100")
+}
+
+func assert422Response(t *testing.T, res *http.Response) {
+	assertResponseWithStatusAndMessage(t, res, 422, "invalid_json", "Cannot decode the given JSON payload")
+}
+
 func assert404Response(t *testing.T, res *http.Response) {
 	assertResponseWithStatusAndMessage(t, res, http.StatusNotFound, "feature_not_found", "The feature was not found")
 }
@@ -174,7 +232,7 @@ func assertJSONMatchesStructure(t *testing.T, res *http.Response, key string, en
 	jq := extractJSON(res)
 
 	assert.Equal(t, key, getJSONString(jq, "key"))
-	assert.False(t, enabled, getJSONBool(jq, "enabled"))
+	assert.Equal(t, enabled, getJSONBool(jq, "enabled"))
 	assert.Equal(t, users, getJSONArrayOfInts(jq, "users"))
 	assert.Equal(t, groups, getJSONArrayOfStrings(jq, "groups"))
 	assert.Equal(t, percentage, getJSONInt(jq, "percentage"))
