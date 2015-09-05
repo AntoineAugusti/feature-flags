@@ -27,27 +27,24 @@ var (
 	database *bolt.DB
 )
 
-func init() {
+func onStart() {
 	database = getTestDB()
 	server = httptest.NewServer(NewRouter(&APIHandler{s.FeatureService{database}}))
 	base = fmt.Sprintf("%s/features", server.URL)
 }
 
+func onFinish() {
+	database.Close()
+	if err := os.Remove(getDBPath()); err != nil {
+		panic(err)
+	}
+}
+
 func TestAddFeatureFlag(t *testing.T) {
-	defer closeDB()
+	onStart()
+	defer onFinish()
 
-	payload := `{
-      "key":"homepage_v2",
-      "enabled":false,
-      "users":[],
-      "groups":[
-         "dev",
-         "admin"
-      ],
-      "percentage":0
-    }`
-
-	reader = strings.NewReader(payload)
+	reader = strings.NewReader(getDummyFeaturePayload())
 	request, err := http.NewRequest("POST", base, reader)
 	res, err := http.DefaultClient.Do(request)
 
@@ -56,7 +53,7 @@ func TestAddFeatureFlag(t *testing.T) {
 	}
 
 	// 201 response
-	assert.Equal(t, res.StatusCode, http.StatusCreated)
+	assert.Equal(t, http.StatusCreated, res.StatusCode)
 
 	// Structure is ok
 	assertJSONMatchesStructure(
@@ -67,6 +64,81 @@ func TestAddFeatureFlag(t *testing.T) {
 		[]string{"dev", "admin"},
 		0,
 	)
+
+	// Add a feature with the same key
+	reader = strings.NewReader(getDummyFeaturePayload())
+	request, err = http.NewRequest("POST", base, reader)
+	res, err = http.DefaultClient.Do(request)
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	assertErrorWithStatusAndMessage(t, res, http.StatusBadRequest, "invalid_feature", "Feature already exists")
+}
+
+func TestGetFeatureFlag(t *testing.T) {
+	onStart()
+	defer onFinish()
+
+	// Add the default dummy feature
+	reader = strings.NewReader(getDummyFeaturePayload())
+	postRequest, _ := http.NewRequest("POST", base, reader)
+	if _, err := http.DefaultClient.Do(postRequest); err != nil {
+		panic(err)
+	}
+
+	// Try to get the default dummy feature
+	request, _ := http.NewRequest("GET", fmt.Sprintf("%s/%s", base, "homepage_v2"), nil)
+	res, err := http.DefaultClient.Do(request)
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	// 200 response
+	assert.Equal(t, http.StatusOK, res.StatusCode)
+
+	// Structure is ok
+	assertJSONMatchesStructure(
+		t, res,
+		"homepage_v2",
+		false,
+		[]int{},
+		[]string{"dev", "admin"},
+		0,
+	)
+
+	// Try to show an unexisting feature
+	request, _ = http.NewRequest("GET", fmt.Sprintf("%s/%s", base, "notfound"), nil)
+	res, _ = http.DefaultClient.Do(request)
+
+	assert404Response(t, res)
+}
+
+func assert404Response(t *testing.T, res *http.Response) {
+	assertErrorWithStatusAndMessage(t, res, http.StatusNotFound, "feature_not_found", "The feature was not found")
+}
+
+func assertErrorWithStatusAndMessage(t *testing.T, res *http.Response, code int, status, message string) {
+	assert.Equal(t, res.StatusCode, code)
+
+	jq := extractJSON(res)
+	assert.Equal(t, status, getJSONString(jq, "status"))
+	assert.Equal(t, message, getJSONString(jq, "message"))
+}
+
+func getDummyFeaturePayload() string {
+	return `{
+      "key":"homepage_v2",
+      "enabled":false,
+      "users":[],
+      "groups":[
+         "dev",
+         "admin"
+      ],
+      "percentage":0
+    }`
 }
 
 func assertJSONMatchesStructure(t *testing.T, res *http.Response, key string, enabled bool, users []int, groups []string, percentage int) {
@@ -128,11 +200,4 @@ func getTestDB() *bolt.DB {
 
 func getDBPath() string {
 	return "/tmp/test.db"
-}
-
-func closeDB() {
-	if err := os.Remove(getDBPath()); err != nil {
-		panic(err)
-	}
-	database.Close()
 }
