@@ -44,18 +44,10 @@ func TestAddFeatureFlag(t *testing.T) {
 	onStart()
 	defer onFinish()
 
-	reader = strings.NewReader(getDummyFeaturePayload())
-	request, err := http.NewRequest("POST", base, reader)
-	res, err := http.DefaultClient.Do(request)
+	res := createDummyFeatureFlag()
 
-	if err != nil {
-		t.Error(err)
-	}
-
-	// 201 response
 	assert.Equal(t, http.StatusCreated, res.StatusCode)
 
-	// Structure is ok
 	assertJSONMatchesStructure(
 		t, res,
 		"homepage_v2",
@@ -66,15 +58,16 @@ func TestAddFeatureFlag(t *testing.T) {
 	)
 
 	// Add a feature with the same key
-	reader = strings.NewReader(getDummyFeaturePayload())
-	request, err = http.NewRequest("POST", base, reader)
-	res, err = http.DefaultClient.Do(request)
-
-	if err != nil {
-		t.Error(err)
-	}
+	res = createDummyFeatureFlag()
 
 	assertResponseWithStatusAndMessage(t, res, http.StatusBadRequest, "invalid_feature", "Feature already exists")
+
+	// Add with an invalid JSON payload
+	reader = strings.NewReader("{foo:bar}")
+	request, _ := http.NewRequest("POST", base, reader)
+	res, _ = http.DefaultClient.Do(request)
+
+	assert422Response(t, res)
 }
 
 func TestGetFeatureFlag(t *testing.T) {
@@ -82,13 +75,9 @@ func TestGetFeatureFlag(t *testing.T) {
 	defer onFinish()
 
 	// Add the default dummy feature
-	reader = strings.NewReader(getDummyFeaturePayload())
-	postRequest, _ := http.NewRequest("POST", base, reader)
-	if _, err := http.DefaultClient.Do(postRequest); err != nil {
-		panic(err)
-	}
+	createDummyFeatureFlag()
 
-	// Try to get the default dummy feature
+	// Get the default dummy feature
 	request, _ := http.NewRequest("GET", fmt.Sprintf("%s/%s", base, "homepage_v2"), nil)
 	res, err := http.DefaultClient.Do(request)
 
@@ -96,10 +85,8 @@ func TestGetFeatureFlag(t *testing.T) {
 		t.Error(err)
 	}
 
-	// 200 response
 	assert.Equal(t, http.StatusOK, res.StatusCode)
 
-	// Structure is ok
 	assertJSONMatchesStructure(
 		t, res,
 		"homepage_v2",
@@ -109,7 +96,7 @@ func TestGetFeatureFlag(t *testing.T) {
 		0,
 	)
 
-	// Try to show an unexisting feature
+	// Show an unexisting feature
 	request, _ = http.NewRequest("GET", fmt.Sprintf("%s/%s", base, "notfound"), nil)
 	res, _ = http.DefaultClient.Do(request)
 
@@ -121,13 +108,9 @@ func TestDeleteFeatureFlag(t *testing.T) {
 	defer onFinish()
 
 	// Add the default dummy feature
-	reader = strings.NewReader(getDummyFeaturePayload())
-	postRequest, _ := http.NewRequest("POST", base, reader)
-	if _, err := http.DefaultClient.Do(postRequest); err != nil {
-		panic(err)
-	}
+	createDummyFeatureFlag()
 
-	// Try to delete the default dummy feature
+	// Delete the default dummy feature
 	request, _ := http.NewRequest("DELETE", fmt.Sprintf("%s/%s", base, "homepage_v2"), nil)
 	res, err := http.DefaultClient.Do(request)
 
@@ -135,10 +118,9 @@ func TestDeleteFeatureFlag(t *testing.T) {
 		t.Error(err)
 	}
 
-	// 200 response
 	assertResponseWithStatusAndMessage(t, res, http.StatusOK, "feature_deleted", "The feature was successfully deleted")
 
-	// Try to delete an unexisting feature
+	// Delete an unexisting feature
 	request, _ = http.NewRequest("DELETE", fmt.Sprintf("%s/%s", base, "notfound"), nil)
 	res, _ = http.DefaultClient.Do(request)
 
@@ -150,9 +132,7 @@ func TestEditFeatureFlag(t *testing.T) {
 	defer onFinish()
 
 	// Add the default dummy feature
-	reader = strings.NewReader(getDummyFeaturePayload())
-	postRequest, _ := http.NewRequest("POST", base, reader)
-	http.DefaultClient.Do(postRequest)
+	createDummyFeatureFlag()
 
 	// Edit the default dummy feature
 	payload := `{
@@ -197,6 +177,17 @@ func TestEditFeatureFlag(t *testing.T) {
 	res, _ = http.DefaultClient.Do(request)
 
 	assertResponseWithStatusAndMessage(t, res, http.StatusBadRequest, "invalid_feature", "Percentage must be between 0 and 100")
+}
+
+func createDummyFeatureFlag() *http.Response {
+	reader = strings.NewReader(getDummyFeaturePayload())
+	postRequest, _ := http.NewRequest("POST", base, reader)
+	res, err := http.DefaultClient.Do(postRequest)
+	if err != nil {
+		panic(err)
+	}
+
+	return res
 }
 
 func assert422Response(t *testing.T, res *http.Response) {
