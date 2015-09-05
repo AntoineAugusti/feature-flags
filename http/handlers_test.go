@@ -52,7 +52,7 @@ func TestAddFeatureFlag(t *testing.T) {
 		t, res,
 		"homepage_v2",
 		false,
-		[]int{},
+		[]int{2},
 		[]string{"dev", "admin"},
 		0,
 	)
@@ -91,7 +91,7 @@ func TestGetFeatureFlag(t *testing.T) {
 		t, res,
 		"homepage_v2",
 		false,
-		[]int{},
+		[]int{2},
 		[]string{"dev", "admin"},
 		0,
 	)
@@ -179,6 +179,43 @@ func TestEditFeatureFlag(t *testing.T) {
 	assertResponseWithStatusAndMessage(t, res, http.StatusBadRequest, "invalid_feature", "Percentage must be between 0 and 100")
 }
 
+func TestAccessFeatureFlag(t *testing.T) {
+	onStart()
+	defer onFinish()
+
+	// Add the default dummy feature
+	createDummyFeatureFlag()
+
+	// Access thanks to the user ID
+	reader = strings.NewReader(`{"user":2}`)
+	request, _ := http.NewRequest("GET", fmt.Sprintf("%s/%s/access", base, "homepage_v2"), reader)
+	res, _ := http.DefaultClient.Do(request)
+
+	assertAccessToTheFeature(t, res)
+
+	// No access because of the user ID
+	reader = strings.NewReader(`{"user":3}`)
+	request, _ = http.NewRequest("GET", fmt.Sprintf("%s/%s/access", base, "homepage_v2"), reader)
+	res, _ = http.DefaultClient.Do(request)
+
+	assertNoAccessToTheFeature(t, res)
+
+	// Access thanks to the group
+	reader = strings.NewReader(`{"user":3, "groups":["dev", "foo"]}`)
+	request, _ = http.NewRequest("GET", fmt.Sprintf("%s/%s/access", base, "homepage_v2"), reader)
+	res, _ = http.DefaultClient.Do(request)
+
+	assertAccessToTheFeature(t, res)
+}
+
+func assertAccessToTheFeature(t *testing.T, res *http.Response) {
+	assertResponseWithStatusAndMessage(t, res, http.StatusOK, "has_access", "The user has access to the feature")
+}
+
+func assertNoAccessToTheFeature(t *testing.T, res *http.Response) {
+	assertResponseWithStatusAndMessage(t, res, http.StatusOK, "not_access", "The user does not have access to the feature")
+}
+
 func createDummyFeatureFlag() *http.Response {
 	reader = strings.NewReader(getDummyFeaturePayload())
 	postRequest, _ := http.NewRequest("POST", base, reader)
@@ -210,7 +247,7 @@ func getDummyFeaturePayload() string {
 	return `{
       "key":"homepage_v2",
       "enabled":false,
-      "users":[],
+      "users":[2],
       "groups":[
          "dev",
          "admin"
