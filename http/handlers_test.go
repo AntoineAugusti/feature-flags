@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"net/http/httptest"
@@ -14,9 +13,9 @@ import (
 	"time"
 
 	db "github.com/antoineaugusti/golang-feature-flags/db"
+	m "github.com/antoineaugusti/golang-feature-flags/models"
 	s "github.com/antoineaugusti/golang-feature-flags/services"
 	"github.com/boltdb/bolt"
-	"github.com/jmoiron/jsonq"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -79,11 +78,7 @@ func TestGetFeatureFlag(t *testing.T) {
 
 	// Get the default dummy feature
 	request, _ := http.NewRequest("GET", fmt.Sprintf("%s/%s", base, "homepage_v2"), nil)
-	res, err := http.DefaultClient.Do(request)
-
-	if err != nil {
-		t.Error(err)
-	}
+	res, _ := http.DefaultClient.Do(request)
 
 	assert.Equal(t, http.StatusOK, res.StatusCode)
 
@@ -112,11 +107,7 @@ func TestDeleteFeatureFlag(t *testing.T) {
 
 	// Delete the default dummy feature
 	request, _ := http.NewRequest("DELETE", fmt.Sprintf("%s/%s", base, "homepage_v2"), nil)
-	res, err := http.DefaultClient.Do(request)
-
-	if err != nil {
-		t.Error(err)
-	}
+	res, _ := http.DefaultClient.Do(request)
 
 	assertResponseWithStatusAndMessage(t, res, http.StatusOK, "feature_deleted", "The feature was successfully deleted")
 
@@ -208,6 +199,28 @@ func TestAccessFeatureFlag(t *testing.T) {
 	assertAccessToTheFeature(t, res)
 }
 
+func TestListFeatureFlags(t *testing.T) {
+	var features m.FeatureFlags
+	onStart()
+	defer onFinish()
+
+	request, _ := http.NewRequest("GET", base, nil)
+	res, _ := http.DefaultClient.Do(request)
+
+	json.NewDecoder(res.Body).Decode(&features)
+	assert.Equal(t, 0, len(features))
+
+	// Add the default dummy feature
+	createDummyFeatureFlag()
+
+	request, _ = http.NewRequest("GET", base, nil)
+	res, _ = http.DefaultClient.Do(request)
+
+	json.NewDecoder(res.Body).Decode(&features)
+	assert.Equal(t, 1, len(features))
+	assert.Equal(t, "homepage_v2", features[0].Key)
+}
+
 func assertAccessToTheFeature(t *testing.T, res *http.Response) {
 	assertResponseWithStatusAndMessage(t, res, http.StatusOK, "has_access", "The user has access to the feature")
 }
@@ -236,11 +249,12 @@ func assert404Response(t *testing.T, res *http.Response) {
 }
 
 func assertResponseWithStatusAndMessage(t *testing.T, res *http.Response, code int, status, message string) {
+	var apiMessage APIMessage
 	assert.Equal(t, res.StatusCode, code)
 
-	jq := extractJSON(res)
-	assert.Equal(t, status, getJSONString(jq, "status"))
-	assert.Equal(t, message, getJSONString(jq, "message"))
+	json.NewDecoder(res.Body).Decode(&apiMessage)
+	assert.Equal(t, status, apiMessage.Status)
+	assert.Equal(t, message, apiMessage.Message)
 }
 
 func getDummyFeaturePayload() string {
@@ -257,49 +271,22 @@ func getDummyFeaturePayload() string {
 }
 
 func assertJSONMatchesStructure(t *testing.T, res *http.Response, key string, enabled bool, users []int, groups []string, percentage int) {
-	jq := extractJSON(res)
+	var feature m.FeatureFlag
+	json.NewDecoder(res.Body).Decode(&feature)
 
-	assert.Equal(t, key, getJSONString(jq, "key"))
-	assert.Equal(t, enabled, getJSONBool(jq, "enabled"))
-	assert.Equal(t, users, getJSONArrayOfInts(jq, "users"))
-	assert.Equal(t, groups, getJSONArrayOfStrings(jq, "groups"))
-	assert.Equal(t, percentage, getJSONInt(jq, "percentage"))
+	assert.Equal(t, key, feature.Key)
+	assert.Equal(t, enabled, feature.Enabled)
+	assert.Equal(t, intsToUints32(users), feature.Users)
+	assert.Equal(t, groups, feature.Groups)
+	assert.Equal(t, uint32(percentage), feature.Percentage)
 }
 
-func getJSONString(jq *jsonq.JsonQuery, key string) string {
-	v, _ := jq.String(key)
-	return v
-}
-
-func getJSONInt(jq *jsonq.JsonQuery, key string) int {
-	v, _ := jq.Int(key)
-	return v
-}
-
-func getJSONBool(jq *jsonq.JsonQuery, key string) bool {
-	v, _ := jq.Bool(key)
-	return v
-}
-
-func getJSONArrayOfStrings(jq *jsonq.JsonQuery, key string) []string {
-	v, _ := jq.ArrayOfStrings(key)
-	return v
-}
-
-func getJSONArrayOfInts(jq *jsonq.JsonQuery, key string) []int {
-	v, _ := jq.ArrayOfInts(key)
-	return v
-}
-
-func extractJSON(res *http.Response) *jsonq.JsonQuery {
-	data := map[string]interface{}{}
-
-	body, _ := ioutil.ReadAll(res.Body)
-	if err := json.Unmarshal(body, &data); err != nil {
-		panic(err)
+func intsToUints32(numbers []int) []uint32 {
+	res := make([]uint32, 0)
+	for _, nb := range numbers {
+		res = append(res, uint32(nb))
 	}
-
-	return jsonq.NewQuery(data)
+	return res
 }
 
 func getTestDB() *bolt.DB {
