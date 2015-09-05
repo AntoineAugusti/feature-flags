@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	db "github.com/antoineaugusti/golang-feature-flags/db"
-	m "github.com/antoineaugusti/golang-feature-flags/models"
+	db "github.com/antoineaugusti/feature-flags/db"
+	m "github.com/antoineaugusti/feature-flags/models"
 	"github.com/boltdb/bolt"
 	"github.com/stretchr/testify/assert"
 )

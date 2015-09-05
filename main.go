@@ -6,9 +6,9 @@ import (
 	"net/http"
 	"time"
 
-	db "github.com/antoineaugusti/golang-feature-flags/db"
-	h "github.com/antoineaugusti/golang-feature-flags/http"
-	s "github.com/antoineaugusti/golang-feature-flags/services"
+	db "github.com/antoineaugusti/feature-flags/db"
+	h "github.com/antoineaugusti/feature-flags/http"
+	s "github.com/antoineaugusti/feature-flags/services"
 	"github.com/boltdb/bolt"
 )
 

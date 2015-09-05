@@ -1,4 +1,4 @@
-[![Travis CI](http://img.shields.io/travis/AntoineAugusti/golang-feature-flags/master.svg?style=flat)](https://travis-ci.org/AntoineAugusti/golang-feature-flags)
+[![Travis CI](http://img.shields.io/travis/AntoineAugusti/feature-flags/master.svg?style=flat)](https://travis-ci.org/AntoineAugusti/feature-flags)
 # Feature flags API in Go
 This package uses [boltdb/bolt](https://github.com/boltdb/bolt), a key-value store for storage. You do not need to connect another database! The HTTP routing is done by [gorilla/mux](http://www.gorillatoolkit.org/pkg/mux).
 
@@ -17,19 +17,19 @@ And you can combine things! You can give access to a feature for users in the gr
 ## Getting started
 You can grab this package with the following command:
 ```
-go get github.com/antoineaugusti/golang-feature-flags
+go get gopkg.in/antoineaugusti/feature-flags.v0
 ```
 
 And then build it:
 ```
-cd ${GOPATH%/}/src/github.com/antoineaugusti/golang-feature-flags
+cd ${GOPATH%/}/src/github.com/antoineaugusti/feature-flags
 go build
 ```
 
 ## Usage
 From the `-h` flag:
 ```
-Usage of ./golang-feature-flags:
+Usage of ./feature-flags:
   -a string
         address to listen (default ":8080")
   -d string

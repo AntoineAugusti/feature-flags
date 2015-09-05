@@ -5,7 +5,7 @@ import (
 	"hash/crc32"
 	"regexp"
 
-	helpers "github.com/antoineaugusti/golang-feature-flags/helpers"
+	helpers "github.com/antoineaugusti/feature-flags/helpers"
 )
 
 type FeatureFlag struct {

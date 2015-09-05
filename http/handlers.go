@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"net/http"
 
-	m "github.com/antoineaugusti/golang-feature-flags/models"
-	services "github.com/antoineaugusti/golang-feature-flags/services"
+	m "github.com/antoineaugusti/feature-flags/models"
+	services "github.com/antoineaugusti/feature-flags/services"
 	"github.com/gorilla/mux"
 )
 

@@ -3,8 +3,8 @@ package services
 import (
 	"fmt"
 
-	m "github.com/antoineaugusti/golang-feature-flags/models"
-	repos "github.com/antoineaugusti/golang-feature-flags/repos"
+	m "github.com/antoineaugusti/feature-flags/models"
+	repos "github.com/antoineaugusti/feature-flags/repos"
 	"github.com/boltdb/bolt"
 )
 
