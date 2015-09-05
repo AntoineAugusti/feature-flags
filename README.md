@@ -251,6 +251,7 @@ Check if a feature flag is enabled for a user or a list of groups.
 - Endpoint: `/features/:featureKey/access`
 - Input:
     The `Content-Type` HTTP header should be set to `application/json`
+
     ```json
    {
       "groups":[
