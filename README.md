@@ -242,11 +242,8 @@ Update a feature flag.
       "message":"<reason>"
     }
     ```
-    Common reasons:
-    - the feature key already exists. The `message` will be `Feature already exists`
+    Common reason:
     - the percentage must be between `0` and `100`
-    - the feature key must be between `3` and `50` characters
-    - the feature key must only contain digits, lowercase letters and underscores
 
 #### `GET` `/features/:featureKey/access`
 Check if a feature flag is enabled for a user or a list of groups.
