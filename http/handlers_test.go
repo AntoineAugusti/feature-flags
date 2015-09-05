@@ -74,7 +74,7 @@ func TestAddFeatureFlag(t *testing.T) {
 		t.Error(err)
 	}
 
-	assertErrorWithStatusAndMessage(t, res, http.StatusBadRequest, "invalid_feature", "Feature already exists")
+	assertResponseWithStatusAndMessage(t, res, http.StatusBadRequest, "invalid_feature", "Feature already exists")
 }
 
 func TestGetFeatureFlag(t *testing.T) {
@@ -116,11 +116,40 @@ func TestGetFeatureFlag(t *testing.T) {
 	assert404Response(t, res)
 }
 
-func assert404Response(t *testing.T, res *http.Response) {
-	assertErrorWithStatusAndMessage(t, res, http.StatusNotFound, "feature_not_found", "The feature was not found")
+func TestDeleteFeatureFlag(t *testing.T) {
+	onStart()
+	defer onFinish()
+
+	// Add the default dummy feature
+	reader = strings.NewReader(getDummyFeaturePayload())
+	postRequest, _ := http.NewRequest("POST", base, reader)
+	if _, err := http.DefaultClient.Do(postRequest); err != nil {
+		panic(err)
+	}
+
+	// Try to delete the default dummy feature
+	request, _ := http.NewRequest("DELETE", fmt.Sprintf("%s/%s", base, "homepage_v2"), nil)
+	res, err := http.DefaultClient.Do(request)
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	// 200 response
+	assertResponseWithStatusAndMessage(t, res, http.StatusOK, "feature_deleted", "The feature was successfully deleted")
+
+	// Try to delete an unexisting feature
+	request, _ = http.NewRequest("DELETE", fmt.Sprintf("%s/%s", base, "notfound"), nil)
+	res, _ = http.DefaultClient.Do(request)
+
+	assert404Response(t, res)
 }
 
-func assertErrorWithStatusAndMessage(t *testing.T, res *http.Response, code int, status, message string) {
+func assert404Response(t *testing.T, res *http.Response) {
+	assertResponseWithStatusAndMessage(t, res, http.StatusNotFound, "feature_not_found", "The feature was not found")
+}
+
+func assertResponseWithStatusAndMessage(t *testing.T, res *http.Response, code int, status, message string) {
 	assert.Equal(t, res.StatusCode, code)
 
 	jq := extractJSON(res)
