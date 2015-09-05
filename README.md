@@ -197,8 +197,8 @@ Update a feature flag.
    {
       "enabled":true,
       "users":[
-        "foo",
-        "bar"
+        13,
+        37
       ],
       "groups":[
          "dev"
@@ -212,8 +212,8 @@ Update a feature flag.
    {
       "key":"homepage_v2",
       "users":[
-        "foo",
-        "bar"
+        13,
+        37
       ],
       "groups":[
          "dev"
