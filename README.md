@@ -1,4 +1,5 @@
-[![Travis CI](http://img.shields.io/travis/AntoineAugusti/feature-flags/master.svg?style=flat)](https://travis-ci.org/AntoineAugusti/feature-flags)
+[![Travis CI](http://img.shields.io/travis/AntoineAugusti/feature-flags/master.svg?style=flat-square)](https://travis-ci.org/AntoineAugusti/feature-flags)
+[![Software License](http://img.shields.io/badge/License-MIT-orange.svg?style=flat-square)](https://github.com/AntoineAugusti/feature-flags/LICENSE.md)
 # Feature flags API in Go
 This package uses [boltdb/bolt](https://github.com/boltdb/bolt), a key-value store for storage. You do not need to connect another database! The HTTP routing is done by [gorilla/mux](http://www.gorillatoolkit.org/pkg/mux).
 
