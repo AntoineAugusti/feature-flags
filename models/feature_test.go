@@ -25,7 +25,32 @@ func TestEnabled(t *testing.T) {
 	assert.True(t, f.IsPartiallyEnabled())
 }
 
+func TestValidate(t *testing.T) {
+	f := FeatureFlag{
+		Key:        "foo",
+		Enabled:    false,
+		Users:      []uint32{},
+		Groups:     []string{},
+		Percentage: 101,
 	}
+
+	err := f.Validate()
+	assert.NotNil(t, err)
+	assert.Equal(t, "Percentage must be between 0 and 100", err.Error())
+
+	f.Percentage = 50
+	f.Key = "ab"
+	err = f.Validate()
+	assert.NotNil(t, err)
+	assert.Equal(t, "Feature key must be between 3 and 50 characters", err.Error())
+
+	f.Key = "a&6"
+	err = f.Validate()
+	assert.NotNil(t, err)
+	assert.Equal(t, "Feature key must only contain digits, lowercase letters and underscores", err.Error())
+
+	f.Key = "foo"
+	assert.Nil(t, f.Validate())
 }
 
 func TestPartiallyEnabled(t *testing.T) {
