@@ -1,6 +1,10 @@
 package models
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+)
 
 func TestEnabled(t *testing.T) {
 	f := FeatureFlag{
@@ -10,18 +14,17 @@ func TestEnabled(t *testing.T) {
 		Groups:     []string{},
 		Percentage: 20,
 	}
-	if !f.IsEnabled() {
-		t.Fatalf("Feature should be enabled")
-	}
 
-	if f.IsPartiallyEnabled() {
-		t.Fatalf("Enabled feature should not be partially enabled")
-	}
+	assert.True(t, f.IsEnabled())
+	assert.False(t, f.IsPartiallyEnabled())
 
 	// Disable the feature
 	f.Enabled = false
-	if f.IsEnabled() {
-		t.Fatalf("Feature should be disabled")
+
+	assert.False(t, f.IsEnabled())
+	assert.True(t, f.IsPartiallyEnabled())
+}
+
 	}
 }
 
@@ -34,21 +37,19 @@ func TestPartiallyEnabled(t *testing.T) {
 		Percentage: 20,
 	}
 
-	if !f.IsPartiallyEnabled() {
-		t.Fatalf("Feature should be partially enabled because of the percentage")
-	}
+	assert.True(t, f.IsPartiallyEnabled())
+
 	f.Percentage = 0
-
 	f.Groups = []string{"a"}
-	if !f.IsPartiallyEnabled() {
-		t.Fatalf("Feature should be partially enabled because of the groups")
-	}
-	f.Groups = []string{}
+	assert.True(t, f.IsPartiallyEnabled())
 
+	f.Groups = []string{}
 	f.Users = []uint32{22}
-	if !f.IsPartiallyEnabled() {
-		t.Fatalf("Feature should be partially enabled because of the users")
-	}
+	assert.True(t, f.IsPartiallyEnabled())
+
+	f.Percentage = 100
+	assert.False(t, f.IsPartiallyEnabled())
+	assert.True(t, f.IsEnabled())
 }
 
 func TestGroupHasAccess(t *testing.T) {
@@ -60,33 +61,21 @@ func TestGroupHasAccess(t *testing.T) {
 		Percentage: 20,
 	}
 	// Make sure the feature is not enabled
-	if f.IsEnabled() {
-		t.Fatalf("Feature should not be enabled")
-	}
+	assert.False(t, f.IsEnabled())
 
-	if !f.GroupHasAccess("bar") {
-		t.Fatalf("Group bar should have access")
-	}
-	if f.GroupHasAccess("baz") {
-		t.Fatalf("Group baz should not have access")
-	}
+	assert.True(t, f.GroupHasAccess("bar"))
+	assert.False(t, f.GroupHasAccess("baz"))
 
 	f.Groups = []string{"bar", "baz"}
-	if !f.GroupHasAccess("baz") {
-		t.Fatalf("Group baz should have access")
-	}
+	assert.True(t, f.GroupHasAccess("baz"))
 
 	f.Enabled = true
-	if !f.GroupHasAccess("klm") {
-		t.Fatalf("Group klm should have access")
-	}
+	assert.True(t, f.GroupHasAccess("klm"))
 
 	f.Groups = []string{}
 	f.Percentage = 100
 	f.Enabled = false
-	if !f.GroupHasAccess("test") {
-		t.Fatalf("Group test should have access")
-	}
+	assert.True(t, f.GroupHasAccess("test"))
 }
 
 func TestUserHasAccess(t *testing.T) {
@@ -98,31 +87,19 @@ func TestUserHasAccess(t *testing.T) {
 		Percentage: 20,
 	}
 	// Make sure the feature is not enabled
-	if f.IsEnabled() {
-		t.Fatalf("Feature should not be enabled")
-	}
+	assert.False(t, f.IsEnabled())
 
-	if !f.UserHasAccess(42) {
-		t.Fatalf("User 42 should have access")
-	}
-	if f.UserHasAccess(1337) {
-		t.Fatalf("User 1337 should not have access")
-	}
+	assert.True(t, f.UserHasAccess(42))
+	assert.False(t, f.UserHasAccess(1337))
 
 	f.Users = []uint32{42, 1337}
-	if !f.UserHasAccess(1337) {
-		t.Fatalf("User 1337 should have access")
-	}
+	assert.True(t, f.UserHasAccess(1337))
 
 	f.Enabled = true
-	if !f.UserHasAccess(222) {
-		t.Fatalf("User 222 should have access")
-	}
+	assert.True(t, f.UserHasAccess(222))
 
 	f.Users = []uint32{}
 	f.Percentage = 100
 	f.Enabled = false
-	if !f.UserHasAccess(222) {
-		t.Fatalf("User 222 should have access")
-	}
+	assert.True(t, f.UserHasAccess(222))
 }

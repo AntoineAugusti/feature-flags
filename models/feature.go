@@ -36,7 +36,7 @@ func (f *FeatureFlag) Validate() error {
 }
 
 func (f *FeatureFlag) IsEnabled() bool {
-	return f.Enabled
+	return f.Enabled || f.Percentage == 100
 }
 
 func (f *FeatureFlag) IsPartiallyEnabled() bool {
@@ -44,7 +44,7 @@ func (f *FeatureFlag) IsPartiallyEnabled() bool {
 }
 
 func (f *FeatureFlag) GroupHasAccess(group string) bool {
-	return f.IsEnabled() || f.Percentage == 100 || (f.IsPartiallyEnabled() && f.groupInGroups(group))
+	return f.IsEnabled() || (f.IsPartiallyEnabled() && f.groupInGroups(group))
 }
 
 func (f *FeatureFlag) UserHasAccess(user uint32) bool {
