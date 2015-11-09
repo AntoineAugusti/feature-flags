@@ -28,7 +28,7 @@ var (
 
 func onStart() {
 	database = getTestDB()
-	server = httptest.NewServer(NewRouter(&APIHandler{s.FeatureService{database}}))
+	server = httptest.NewServer(NewRouter(&APIHandler{FeatureService: s.FeatureService{DB: database}}))
 	base = fmt.Sprintf("%s/features", server.URL)
 }
 
