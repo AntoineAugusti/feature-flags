@@ -29,7 +29,7 @@ func main() {
 	// Generate the default bucket
 	db.GenerateDefaultBucket(db.GetBucketName(), database)
 
-	api := h.APIHandler{s.FeatureService{database}}
+	api := h.APIHandler{FeatureService: s.FeatureService{DB: database}}
 
 	// Create and listen for the HTTP server
 	router := h.NewRouter(&api)
