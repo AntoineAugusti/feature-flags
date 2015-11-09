@@ -1,5 +1,8 @@
-[![Travis CI](http://img.shields.io/travis/AntoineAugusti/feature-flags/master.svg?style=flat-square)](https://travis-ci.org/AntoineAugusti/feature-flags)
-[![Software License](http://img.shields.io/badge/License-MIT-orange.svg?style=flat-square)](https://github.com/AntoineAugusti/feature-flags/LICENSE.md)
+[![Travis CI](https://img.shields.io/travis/AntoineAugusti/feature-flags/master.svg?style=flat-square)](https://travis-ci.org/AntoineAugusti/feature-flags)
+[![Software License](https://img.shields.io/badge/License-MIT-orange.svg?style=flat-square)](https://github.com/AntoineAugusti/feature-flags/blob/master/LICENSE.md)
+[![GoDoc](https://img.shields.io/badge/godoc-reference-blue.svg?style=flat-square)](https://godoc.org/github.com/AntoineAugusti/feature-flags)
+[![Coverage Status](http://codecov.io/github/AntoineAugusti/feature-flags/coverage.svg?branch=master)](http://codecov.io/github/AntoineAugusti/feature-flags?branch=master)
+
 # Feature flags API in Go
 This package uses [boltdb/bolt](https://github.com/boltdb/bolt), a key-value store for storage. You do not need to connect another database! The HTTP routing is done by [gorilla/mux](http://www.gorillatoolkit.org/pkg/mux).
 
