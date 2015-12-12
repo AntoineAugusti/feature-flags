@@ -49,7 +49,7 @@ This API does not ship with an authentication layer. You **should not** expose t
 - [`GET` /features/:featureKey](#get-featuresfeaturekey) - Get a single feature flag
 - [`DELETE` /features/:featureKey](#delete-featuresfeaturekey) - Delete a feature flag
 - [`PATCH` /features/:featureKey](#patch-featuresfeaturekey) - Update a feature flag
-- [`GET` /features/:featureKey/access](#get-featuresfeaturekeyaccess) - Check if someone has access to a feature
+- [`POST` /features/:featureKey/access](#get-featuresfeaturekeyaccess) - Check if someone has access to a feature
 
 ### API Documentation
 #### `GET` `/features`
@@ -249,9 +249,9 @@ Update a feature flag.
     Common reason:
     - the percentage must be between `0` and `100`
 
-#### `GET` `/features/:featureKey/access`
+#### `POST` `/features/:featureKey/access`
 Check if a feature flag is enabled for a user or a list of groups.
-- Method: `GET`
+- Method: `POST`
 - Endpoint: `/features/:featureKey/access`
 - Input:
     The `Content-Type` HTTP header should be set to `application/json`

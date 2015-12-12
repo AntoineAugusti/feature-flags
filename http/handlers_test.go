@@ -179,21 +179,21 @@ func TestAccessFeatureFlag(t *testing.T) {
 
 	// Access thanks to the user ID
 	reader = strings.NewReader(`{"user":2}`)
-	request, _ := http.NewRequest("GET", fmt.Sprintf("%s/%s/access", base, "homepage_v2"), reader)
+	request, _ := http.NewRequest("POST", fmt.Sprintf("%s/%s/access", base, "homepage_v2"), reader)
 	res, _ := http.DefaultClient.Do(request)
 
 	assertAccessToTheFeature(t, res)
 
 	// No access because of the user ID
 	reader = strings.NewReader(`{"user":3}`)
-	request, _ = http.NewRequest("GET", fmt.Sprintf("%s/%s/access", base, "homepage_v2"), reader)
+	request, _ = http.NewRequest("POST", fmt.Sprintf("%s/%s/access", base, "homepage_v2"), reader)
 	res, _ = http.DefaultClient.Do(request)
 
 	assertNoAccessToTheFeature(t, res)
 
 	// Access thanks to the group
 	reader = strings.NewReader(`{"user":3, "groups":["dev", "foo"]}`)
-	request, _ = http.NewRequest("GET", fmt.Sprintf("%s/%s/access", base, "homepage_v2"), reader)
+	request, _ = http.NewRequest("POST", fmt.Sprintf("%s/%s/access", base, "homepage_v2"), reader)
 	res, _ = http.DefaultClient.Do(request)
 
 	assertAccessToTheFeature(t, res)
