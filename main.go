@@ -32,6 +32,6 @@ func main() {
 	api := h.APIHandler{FeatureService: s.FeatureService{DB: database}}
 
 	// Create and listen for the HTTP server
-	router := h.NewRouter(&api)
+	router := h.NewRouter(api)
 	log.Fatal(http.ListenAndServe(*address, router))
 }

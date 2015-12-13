@@ -2,7 +2,6 @@ package http
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	m "github.com/antoineaugusti/feature-flags/models"
@@ -10,26 +9,28 @@ import (
 	"github.com/gorilla/mux"
 )
 
+// Handles incoming requests
 type APIHandler struct {
 	FeatureService services.FeatureService
 }
 
+// A simple structure to respond with error messages
 type APIMessage struct {
-	code    int
-	Status  string `json:"status"`
+	// The HTTP status code
+	code int
+	// A status message
+	Status string `json:"status"`
+	// A human readable message
 	Message string `json:"message"`
 }
 
+// Describes the request when checking the access to a feature
 type AccessRequest struct {
 	Groups []string `json:"groups"`
 	User   uint32   `json:"user"`
 }
 
-func (handler *APIHandler) Welcome(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "Hello World!\n")
-}
-
-func (handler *APIHandler) FeatureIndex(w http.ResponseWriter, r *http.Request) {
+func (handler APIHandler) FeatureIndex(w http.ResponseWriter, r *http.Request) {
 	features, err := handler.FeatureService.GetFeatures()
 	if err != nil {
 		panic(err)
@@ -42,11 +43,11 @@ func (handler *APIHandler) FeatureIndex(w http.ResponseWriter, r *http.Request) 
 	}
 }
 
-func (handler *APIHandler) FeatureShow(w http.ResponseWriter, r *http.Request) {
+func (handler APIHandler) FeatureShow(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
 	// Check if the feature exists
-	if !handler.FeatureExists(vars["featureKey"]) {
+	if !handler.featureExists(vars["featureKey"]) {
 		writeNotFound(w)
 		return
 	}
@@ -64,12 +65,12 @@ func (handler *APIHandler) FeatureShow(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (handler *APIHandler) FeatureAccess(w http.ResponseWriter, r *http.Request) {
+func (handler APIHandler) FeatureAccess(w http.ResponseWriter, r *http.Request) {
 	var ar AccessRequest
 	vars := mux.Vars(r)
 
 	// Check if the feature exists
-	if !handler.FeatureExists(vars["featureKey"]) {
+	if !handler.featureExists(vars["featureKey"]) {
 		writeNotFound(w)
 		return
 	}
@@ -109,11 +110,11 @@ func (handler *APIHandler) FeatureAccess(w http.ResponseWriter, r *http.Request)
 	}
 }
 
-func (handler *APIHandler) FeatureRemove(w http.ResponseWriter, r *http.Request) {
+func (handler APIHandler) FeatureRemove(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
 	// Check if the feature exists
-	if !handler.FeatureExists(vars["featureKey"]) {
+	if !handler.featureExists(vars["featureKey"]) {
 		writeNotFound(w)
 		return
 	}
@@ -127,7 +128,7 @@ func (handler *APIHandler) FeatureRemove(w http.ResponseWriter, r *http.Request)
 	writeMessage(http.StatusOK, "feature_deleted", "The feature was successfully deleted", w)
 }
 
-func (handler *APIHandler) FeatureCreate(w http.ResponseWriter, r *http.Request) {
+func (handler APIHandler) FeatureCreate(w http.ResponseWriter, r *http.Request) {
 	var feature m.FeatureFlag
 
 	if err := json.NewDecoder(r.Body).Decode(&feature); err != nil {
@@ -153,11 +154,11 @@ func (handler *APIHandler) FeatureCreate(w http.ResponseWriter, r *http.Request)
 	}
 }
 
-func (handler *APIHandler) FeatureEdit(w http.ResponseWriter, r *http.Request) {
+func (handler APIHandler) FeatureEdit(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
 	// Check if the feature exists
-	if !handler.FeatureExists(vars["featureKey"]) {
+	if !handler.featureExists(vars["featureKey"]) {
 		writeNotFound(w)
 		return
 	}
@@ -192,7 +193,7 @@ func (handler *APIHandler) FeatureEdit(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (handler *APIHandler) FeatureExists(featureKey string) bool {
+func (handler APIHandler) featureExists(featureKey string) bool {
 	return handler.FeatureService.FeatureExists(featureKey)
 }
 

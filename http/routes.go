@@ -3,22 +3,20 @@ package http
 import "net/http"
 
 type Route struct {
-	Name        string
-	Method      string
-	Pattern     string
+	// A human readable name for the route
+	Name string
+	// The HTTP method
+	Method string
+	// The URL
+	Pattern string
+	// The handler for this endpoint
 	HandlerFunc http.HandlerFunc
 }
 
 type Routes []Route
 
-func getRoutes(api *APIHandler) Routes {
+func getRoutes(api APIHandler) Routes {
 	return Routes{
-		Route{
-			"Welcome",
-			"GET",
-			"/",
-			api.Welcome,
-		},
 		Route{
 			"FeatureIndex",
 			"GET",

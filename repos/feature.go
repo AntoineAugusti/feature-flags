@@ -9,6 +9,7 @@ import (
 	"github.com/boltdb/bolt"
 )
 
+// Update a feature flag
 func PutFeature(tx *bolt.Tx, feature m.FeatureFlag) error {
 	features := tx.Bucket([]byte(db.GetBucketName()))
 
@@ -25,6 +26,7 @@ func PutFeature(tx *bolt.Tx, feature m.FeatureFlag) error {
 	return nil
 }
 
+// Get a list of feature flags
 func GetFeatures(tx *bolt.Tx) (m.FeatureFlags, error) {
 	featuresBucket := tx.Bucket([]byte(db.GetBucketName()))
 	cursor := featuresBucket.Cursor()
@@ -44,12 +46,14 @@ func GetFeatures(tx *bolt.Tx) (m.FeatureFlags, error) {
 	return features, nil
 }
 
+// Tell if a feature exists
 func FeatureExists(tx *bolt.Tx, featureKey string) bool {
 	features := tx.Bucket([]byte(db.GetBucketName()))
 	bytes := features.Get([]byte(featureKey))
 	return bytes != nil
 }
 
+// Get a feature flag thanks to its key
 func GetFeature(tx *bolt.Tx, featureKey string) (m.FeatureFlag, error) {
 	features := tx.Bucket([]byte(db.GetBucketName()))
 
@@ -68,6 +72,7 @@ func GetFeature(tx *bolt.Tx, featureKey string) (m.FeatureFlag, error) {
 	return feature, nil
 }
 
+// Delete a feature flag thanks to its key
 func RemoveFeature(tx *bolt.Tx, featureKey string) error {
 	features := tx.Bucket([]byte(db.GetBucketName()))
 	return features.Delete([]byte(featureKey))
