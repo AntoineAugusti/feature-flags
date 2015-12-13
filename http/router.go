@@ -6,9 +6,10 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func NewRouter(api *APIHandler) *mux.Router {
-
+// Bind routes to handlers and create a router
+func NewRouter(api APIHandler) *mux.Router {
 	router := mux.NewRouter().StrictSlash(true)
+
 	for _, route := range getRoutes(api) {
 		var handler http.Handler
 

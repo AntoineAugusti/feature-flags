@@ -12,6 +12,7 @@ type FeatureService struct {
 	DB *bolt.DB
 }
 
+// Store a new feature flag in the database
 func (interactor *FeatureService) AddFeature(newFeature m.FeatureFlag) error {
 	return interactor.DB.Update(func(tx *bolt.Tx) error {
 
@@ -24,43 +25,33 @@ func (interactor *FeatureService) AddFeature(newFeature m.FeatureFlag) error {
 			return fmt.Errorf("Feature already exists")
 		}
 
-		err = repos.PutFeature(tx, newFeature)
-		if err != nil {
-			return err
-		}
-
-		return nil
+		return repos.PutFeature(tx, newFeature)
 	})
 }
 
+// Get a list of feature flags
 func (interactor *FeatureService) GetFeatures() (features m.FeatureFlags, err error) {
 	_ = interactor.DB.View(func(tx *bolt.Tx) error {
 
 		features, err = repos.GetFeatures(tx)
-		if err != nil {
-			return err
-		}
-
-		return nil
+		return err
 	})
 
 	return
 }
 
+// Get a single feature flag thanks to its key
 func (interactor *FeatureService) GetFeature(featureKey string) (feature m.FeatureFlag, err error) {
 	_ = interactor.DB.View(func(tx *bolt.Tx) error {
 
 		feature, err = repos.GetFeature(tx, featureKey)
-		if err != nil {
-			return err
-		}
-
-		return nil
+		return err
 	})
 
 	return
 }
 
+// Update a feature flag
 func (interactor *FeatureService) UpdateFeature(featureKey string, newFeature m.FeatureFlag) (feature m.FeatureFlag, err error) {
 	_ = interactor.DB.Update(func(tx *bolt.Tx) error {
 
@@ -82,22 +73,20 @@ func (interactor *FeatureService) UpdateFeature(featureKey string, newFeature m.
 			feature.Percentage = newFeature.Percentage
 		}
 
-		if err = repos.PutFeature(tx, feature); err != nil {
-			return err
-		}
-
-		return nil
+		return repos.PutFeature(tx, feature)
 	})
 
 	return
 }
 
+// Delete a feature flag
 func (interactor *FeatureService) RemoveFeature(featureKey string) error {
 	return interactor.DB.Update(func(tx *bolt.Tx) error {
 		return repos.RemoveFeature(tx, featureKey)
 	})
 }
 
+// Tell if a feature flag exists thanks to a key
 func (interactor *FeatureService) FeatureExists(featureKey string) (exists bool) {
 	_ = interactor.DB.View(func(tx *bolt.Tx) error {
 		exists = repos.FeatureExists(tx, featureKey)

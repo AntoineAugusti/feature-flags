@@ -7,6 +7,7 @@ import (
 	"time"
 )
 
+// Serve and log an incoming request
 func Logger(inner http.Handler, name string) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
@@ -24,6 +25,7 @@ func Logger(inner http.Handler, name string) http.Handler {
 	})
 }
 
+// Extract the IP address from a request
 func getIPAddress(r *http.Request) string {
 	ip, _, _ := net.SplitHostPort(r.RemoteAddr)
 
