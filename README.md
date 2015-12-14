@@ -268,6 +268,7 @@ Get a list of accessible features for a user or a list of groups.
     ```
 - Responses:
     * 200 OK
+
     Same as in [`POST` /features](#post-features). An empty array indicates that no known features are accessible for the given input.
     * 422 Unprocessable entity:
     ```json
