@@ -49,7 +49,8 @@ This API does not ship with an authentication layer. You **should not** expose t
 - [`GET` /features/:featureKey](#get-featuresfeaturekey) - Get a single feature flag
 - [`DELETE` /features/:featureKey](#delete-featuresfeaturekey) - Delete a feature flag
 - [`PATCH` /features/:featureKey](#patch-featuresfeaturekey) - Update a feature flag
-- [`POST` /features/:featureKey/access](#get-featuresfeaturekeyaccess) - Check if someone has access to a feature
+- [`POST` /features/access](#post-featuresaccess) - Get accessible features for a user or some groups
+- [`POST` /features/:featureKey/access](#post-featuresfeaturekeyaccess) - Check if a user or some groups have access to a feature
 
 ### API Documentation
 #### `GET` `/features`
@@ -57,7 +58,7 @@ Get a list of available feature flags.
 - Method: `GET`
 - Endpoint: `/features`
 - Responses:
-    * **200** on success
+    * 200 OK
     ```json
     [
        {
@@ -248,6 +249,33 @@ Update a feature flag.
     ```
     Common reason:
     - the percentage must be between `0` and `100`
+
+#### `POST` `/features/access`
+Get a list of accessible features for a user or a list of groups.
+- Method: `POST`
+- Endpoint: `/features/ccess`
+- Input:
+    The `Content-Type` HTTP header should be set to `application/json`
+
+    ```json
+   {
+      "groups":[
+         "dev",
+         "test"
+      ],
+      "user":42
+   }
+    ```
+- Responses:
+    * 200 OK
+    Same as in [`POST` /features](#post-features). An empty array indicates that no known features are accessible for the given input.
+    * 422 Unprocessable entity:
+    ```json
+    {
+      "status":"invalid_json",
+      "message":"Cannot decode the given JSON payload"
+    }
+    ```
 
 #### `POST` `/features/:featureKey/access`
 Check if a feature flag is enabled for a user or a list of groups.
