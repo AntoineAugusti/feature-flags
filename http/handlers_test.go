@@ -170,30 +170,92 @@ func TestEditFeatureFlag(t *testing.T) {
 	assertResponseWithStatusAndMessage(t, res, http.StatusBadRequest, "invalid_feature", "Percentage must be between 0 and 100")
 }
 
-func TestAccessFeatureFlag(t *testing.T) {
+func TestAccessFeatureFlags(t *testing.T) {
+	var features m.FeatureFlags
 	onStart()
 	defer onFinish()
+
+	url := fmt.Sprintf("%s/access", base)
 
 	// Add the default dummy feature
 	createDummyFeatureFlag()
 
+	// Invalid JSON payload
+	reader = strings.NewReader(`{foo:bar}`)
+	request, _ := http.NewRequest("POST", url, reader)
+	res, _ := http.DefaultClient.Do(request)
+	assert422Response(t, res)
+
 	// Access thanks to the user ID
 	reader = strings.NewReader(`{"user":2}`)
-	request, _ := http.NewRequest("POST", fmt.Sprintf("%s/%s/access", base, "homepage_v2"), reader)
+	request, _ = http.NewRequest("POST", url, reader)
+	res, _ = http.DefaultClient.Do(request)
+
+	json.NewDecoder(res.Body).Decode(&features)
+	assert.Equal(t, 1, len(features))
+	assert.Equal(t, "homepage_v2", features[0].Key)
+
+	// No access because of the user ID
+	reader = strings.NewReader(`{"user":0}`)
+	request, _ = http.NewRequest("POST", url, reader)
+	res, _ = http.DefaultClient.Do(request)
+
+	json.NewDecoder(res.Body).Decode(&features)
+	assert.Equal(t, 0, len(features))
+
+	// Add a feature enabled for everybody
+	payload := `{
+      "key":"testflag",
+      "enabled":true,
+      "users":[],
+      "groups":[],
+      "percentage":0
+    }`
+	createFeatureWithPayload(payload)
+
+	// Access thanks to the group
+	reader = strings.NewReader(`{"groups":["dev"]}`)
+	request, _ = http.NewRequest("POST", url, reader)
+	res, _ = http.DefaultClient.Do(request)
+
+	json.NewDecoder(res.Body).Decode(&features)
+	assert.Equal(t, 2, len(features))
+	assert.Equal(t, "homepage_v2", features[0].Key)
+	assert.Equal(t, "testflag", features[1].Key)
+}
+
+func TestAccessFeatureFlag(t *testing.T) {
+	onStart()
+	defer onFinish()
+
+	url := fmt.Sprintf("%s/%s/access", base, "homepage_v2")
+
+	// Add the default dummy feature
+	createDummyFeatureFlag()
+
+	// Invalid JSON payload
+	reader = strings.NewReader(`{foo:bar}`)
+	request, _ := http.NewRequest("POST", url, reader)
 	res, _ := http.DefaultClient.Do(request)
+	assert422Response(t, res)
+
+	// Access thanks to the user ID
+	reader = strings.NewReader(`{"user":2}`)
+	request, _ = http.NewRequest("POST", url, reader)
+	res, _ = http.DefaultClient.Do(request)
 
 	assertAccessToTheFeature(t, res)
 
 	// No access because of the user ID
 	reader = strings.NewReader(`{"user":3}`)
-	request, _ = http.NewRequest("POST", fmt.Sprintf("%s/%s/access", base, "homepage_v2"), reader)
+	request, _ = http.NewRequest("POST", url, reader)
 	res, _ = http.DefaultClient.Do(request)
 
 	assertNoAccessToTheFeature(t, res)
 
 	// Access thanks to the group
 	reader = strings.NewReader(`{"user":3, "groups":["dev", "foo"]}`)
-	request, _ = http.NewRequest("POST", fmt.Sprintf("%s/%s/access", base, "homepage_v2"), reader)
+	request, _ = http.NewRequest("POST", url, reader)
 	res, _ = http.DefaultClient.Do(request)
 
 	assertAccessToTheFeature(t, res)
@@ -229,8 +291,8 @@ func assertNoAccessToTheFeature(t *testing.T, res *http.Response) {
 	assertResponseWithStatusAndMessage(t, res, http.StatusOK, "not_access", "The user does not have access to the feature")
 }
 
-func createDummyFeatureFlag() *http.Response {
-	reader = strings.NewReader(getDummyFeaturePayload())
+func createFeatureWithPayload(payload string) *http.Response {
+	reader = strings.NewReader(payload)
 	postRequest, _ := http.NewRequest("POST", base, reader)
 	res, err := http.DefaultClient.Do(postRequest)
 	if err != nil {
@@ -238,6 +300,10 @@ func createDummyFeatureFlag() *http.Response {
 	}
 
 	return res
+}
+
+func createDummyFeatureFlag() *http.Response {
+	return createFeatureWithPayload(getDummyFeaturePayload())
 }
 
 func assert422Response(t *testing.T, res *http.Response) {
