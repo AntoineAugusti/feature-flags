@@ -1,12 +1,17 @@
 language: go
-before_install:
-  - go get golang.org/x/tools/cmd/vet
-  - go get github.com/modocache/gover
-  - go get github.com/AntoineAugusti/feature-flags/...
+sudo: false
+
+matrix:
+  include:
+    - go: 1.4
+    - go: 1.5
+    - go: 1.6
+    - go: tip
+  allow_failures:
+    - go: tip
+
 script:
-  - go vet github.com/AntoineAugusti/feature-flags...
-  - go test -v ./...
-  - go list -f '{{if len .TestGoFiles}}"go test -coverprofile={{.Dir}}/.coverprofile {{.ImportPath}}"{{end}}' ./... | xargs -i sh -c {}
-  - gover . coverprofile.txt
-after_success:
-  - bash <(curl -s https://codecov.io/bash) -f coverprofile.txt
+  - go get -t -v $(go list ./...)
+  - if [[ $TRAVIS_GO_VERSION == 1.6* ]]; then diff -u <(echo -n) <(gofmt -d .); fi
+  - if [[ $TRAVIS_GO_VERSION == 1.6* ]]; then go vet $(go list ./...); fi
+  - go test -v -race $(go list ./...)
