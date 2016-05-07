@@ -18,6 +18,8 @@ With this package, you can enable the access of a feature for:
 
 And you can combine things! You can give access to a feature for users in the group `dev` or `admin` and for users `1337` and `42` if you want to.
 
+If you want to know everything about feature flags, check out [this article](http://martinfowler.com/articles/feature-toggles.html).
+
 ## Getting started
 You can grab this package with the following command:
 ```
