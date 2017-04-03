@@ -255,7 +255,7 @@ Update a feature flag.
 #### `POST` `/features/access`
 Get a list of accessible features for a user or a list of groups.
 - Method: `POST`
-- Endpoint: `/features/ccess`
+- Endpoint: `/features/access`
 - Input:
     The `Content-Type` HTTP header should be set to `application/json`
 
