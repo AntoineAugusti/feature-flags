@@ -44,22 +44,22 @@ func (f FeatureFlag) Validate() error {
 	return nil
 }
 
-// Check if a feature flag is enabled
+// IsEnabled checks if a feature flag is enabled
 func (f FeatureFlag) IsEnabled() bool {
 	return f.Enabled || f.Percentage == 100
 }
 
-// Check if a feature flag is partially enabled
+// IsPartiallyEnabled checks if a feature flag is partially enabled
 func (f FeatureFlag) IsPartiallyEnabled() bool {
 	return !f.IsEnabled() && (f.hasUsers() || f.hasGroups() || f.hasPercentage())
 }
 
-// Check if a group has access to a feature
+// GroupHasAccess checks if a group has access to a feature
 func (f FeatureFlag) GroupHasAccess(group string) bool {
 	return f.IsEnabled() || (f.IsPartiallyEnabled() && f.groupInGroups(group))
 }
 
-// Check if a user has access to a feature
+// UserHasAccess checks if a user has access to a feature
 func (f FeatureFlag) UserHasAccess(user uint32) bool {
 	// A user has access:
 	// - if the feature is enabled

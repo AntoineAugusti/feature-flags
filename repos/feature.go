@@ -26,7 +26,7 @@ func PutFeature(tx *bolt.Tx, feature m.FeatureFlag) error {
 	return nil
 }
 
-// Get a list of feature flags
+// GetFeatures gets a list of feature flags
 func GetFeatures(tx *bolt.Tx) (m.FeatureFlags, error) {
 	featuresBucket := tx.Bucket([]byte(db.GetBucketName()))
 	cursor := featuresBucket.Cursor()
@@ -53,7 +53,7 @@ func FeatureExists(tx *bolt.Tx, featureKey string) bool {
 	return bytes != nil
 }
 
-// Get a feature flag thanks to its key
+// GetFeature gets a feature flag thanks to its key
 func GetFeature(tx *bolt.Tx, featureKey string) (m.FeatureFlag, error) {
 	features := tx.Bucket([]byte(db.GetBucketName()))
 

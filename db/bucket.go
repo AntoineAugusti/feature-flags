@@ -6,7 +6,7 @@ import (
 	"github.com/boltdb/bolt"
 )
 
-// Get the name of the bucket
+// GetBucketName gets the name of the bucket
 func GetBucketName() string {
 	return "features"
 }

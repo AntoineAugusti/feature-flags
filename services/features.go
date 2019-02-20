@@ -29,7 +29,7 @@ func (interactor *FeatureService) AddFeature(newFeature m.FeatureFlag) error {
 	})
 }
 
-// Get a list of feature flags
+// GetFeatures gets a list of feature flags
 func (interactor *FeatureService) GetFeatures() (features m.FeatureFlags, err error) {
 	_ = interactor.DB.View(func(tx *bolt.Tx) error {
 
@@ -40,7 +40,7 @@ func (interactor *FeatureService) GetFeatures() (features m.FeatureFlags, err er
 	return
 }
 
-// Get a single feature flag thanks to its key
+// GetFeature gets a single feature flag thanks to its key
 func (interactor *FeatureService) GetFeature(featureKey string) (feature m.FeatureFlag, err error) {
 	_ = interactor.DB.View(func(tx *bolt.Tx) error {
 
